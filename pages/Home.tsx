@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { triggerHaptic } from '../utils/haptics';
 
 type HomePageProps = {
   onBrowsePress?: () => void;
@@ -46,7 +47,10 @@ export default function HomePage({ onBrowsePress }: HomePageProps) {
           </Text>
           <TouchableOpacity
             style={styles.ctaButton}
-            onPress={onBrowsePress}
+            onPress={() => {
+              triggerHaptic();
+              if (onBrowsePress) onBrowsePress();
+            }}
             activeOpacity={0.88}
             accessibilityRole="button"
             accessibilityLabel="Browse all products"
@@ -80,9 +84,12 @@ export default function HomePage({ onBrowsePress }: HomePageProps) {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
+    backgroundColor: 'transparent', // Glass UI
   },
   container: {
-    padding: 24,
+    padding: 20,
+    paddingTop: 100,    // Space for floating header
+    paddingBottom: 120, // Space for floating tab bar
     gap: 28,
   },
   hero: {
@@ -139,25 +146,28 @@ const styles = StyleSheet.create({
     color: '#0f172a',
   },
   highlightList: {
-    gap: 14,
+    gap: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   highlightCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 16,
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 10,
     backgroundColor: '#ffffff',
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: 14,
+    padding: 12,
     shadowColor: '#000',
     shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 2,
+    width: '48%',
   },
   highlightIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     backgroundColor: '#e0f2fe',
     alignItems: 'center',
     justifyContent: 'center',
@@ -165,15 +175,18 @@ const styles = StyleSheet.create({
   highlightBody: {
     flex: 1,
     gap: 4,
+    alignItems: 'center',
   },
   highlightTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#0f172a',
+    textAlign: 'center',
   },
   highlightDescription: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#475569',
-    lineHeight: 20,
+    lineHeight: 18,
+    textAlign: 'center',
   },
 });

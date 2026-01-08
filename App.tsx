@@ -1,22 +1,16 @@
+// App.tsx
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import HomePage from './pages/Home';
-import ShopPage from './pages/Shop';
-import CartPage from './pages/Cart';
-import ProfilePage from './pages/Profile';
-import FavoritesPage from './pages/Favorites';
+import AuthPage from './pages/Auth';
 import {
   SafeAreaProvider,
-  SafeAreaView,
-  useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { selectCartCount, useCartStore } from './store/cartStore';
-import { selectFavoriteCount, useFavoritesStore } from './store/favoritesStore';
+import { TabKey } from './components/types/layout';
+import { Video, ResizeMode } from 'expo-av';
+import MainLayout from './components/layouts/mainlayout';
 
-
-type TabKey = 'home' | 'shop' | 'favorites' | 'cart' | 'profile';
 
 type TabConfig = {
   key: TabKey;
@@ -34,144 +28,201 @@ const TABS: TabConfig[] = [
 ];
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   return (
     <SafeAreaProvider>
-      <TabLayout />
+      <View style={styles.root}>
+        {/* Global Background Video */}
+        <Video
+          source={{
+            uri: 'https://assets.mixkit.co/videos/preview/mixkit-swimming-pool-water-texture-slow-motion-18261-large.mp4',
+          }}
+          style={StyleSheet.absoluteFill}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay
+          isLooping
+          isMuted
+        />
+
+        {/* Global Overlay for readability */}
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: isAuthenticated
+                ? 'rgba(248, 250, 252, 0.75)'
+                : 'rgba(255, 255, 255, 0.2)',
+            },
+          ]}
+        />
+
+        {isAuthenticated ? (
+          <MainLayout onLogout={() => setIsAuthenticated(false)} styles={styles} />
+        ) : (
+          <AuthPage onLoginSuccess={() => setIsAuthenticated(true)} />
+        )}
+      </View>
+
+      <StatusBar style="light" />
     </SafeAreaProvider>
   );
 }
 
-function TabLayout() {
-  const [activeTab, setActiveTab] = useState<TabKey>('home');
-  const insets = useSafeAreaInsets();
-  const cartCount = useCartStore(selectCartCount);
-  const favoriteCount = useFavoritesStore(selectFavoriteCount);
 
-  return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar style="dark" />
-      <View style={styles.container}>
-        <View style={styles.content}>
-          {activeTab === 'home' && (
-            <HomePage onBrowsePress={() => setActiveTab('shop')} />
-          )}
-          {activeTab === 'shop' && <ShopPage />}
-          {activeTab === 'favorites' && <FavoritesPage />}
-          {activeTab === 'cart' && <CartPage />}
-          {activeTab === 'profile' && <ProfilePage />}
-        </View>
-        <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom + 8 }]}>
-          <View style={styles.tabBar}>
-            {TABS.map((tab) => {
-              const isActive = tab.key === activeTab;
-
-              return (
-                <TouchableOpacity
-                  key={tab.key}
-                  style={[styles.tabButton, isActive && styles.tabButtonActive]}
-                  onPress={() => setActiveTab(tab.key)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${tab.label} tab`}
-                  accessibilityState={{ selected: isActive }}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.iconWrapper}>
-                    <Ionicons
-                      name={isActive ? tab.activeIcon : tab.icon}
-                      size={24}
-                      color="#ffffff"
-                      style={isActive ? undefined : styles.inactiveIcon}
-                    />
-                    {tab.key === 'cart' && cartCount > 0 && (
-                      <View style={[styles.badge, styles.cartBadge]}>
-                        <Text style={styles.badgeText}>{cartCount}</Text>
-                      </View>
-                    )}
-                    {tab.key === 'favorites' && favoriteCount > 0 && (
-                      <View style={[styles.badge, styles.favoriteBadge]}>
-                        <Text style={styles.badgeText}>{favoriteCount}</Text>
-                      </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
   },
-  tabBarContainer: {
+
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
-  tabBar: {
+  header: {
+    width: '100%',
+    maxWidth: 420,
+    marginTop: Platform.OS === 'ios' ? 60 : 10, // Push down a bit
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#0C2B4E',
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    columnGap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 6,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingVertical: 12,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+      },
+      android: { elevation: 10 },
+    }),
   },
-  tabButton: {
-    flex: 1,
+  logo: {
+    width: 100,
+    height: 32,
+    tintColor: '#FFFFFF', // White for dark glass
+  },
+  logoutButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
-  tabButtonActive: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
+
+  tabBarContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
-  inactiveIcon: {
-    opacity: 0.7,
+
+  tabBar: {
+    width: '100%',
+    maxWidth: 420,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderRadius: 999,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.35,
+        shadowRadius: 18,
+      },
+      android: { elevation: 18 },
+    }),
   },
+
+  tabIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  tabActivePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+
+    height: 56,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+
+  activeLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#B9A7FF',
+  },
+
   iconWrapper: {
     position: 'relative',
   },
+
   badge: {
     position: 'absolute',
-    top: -8,
-    right: -10,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    top: -6,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: '#ffffff',
   },
   cartBadge: {
-    backgroundColor: '#f97316',
+    backgroundColor: '#0C2B4E',
   },
-  favoriteBadge: {
-    backgroundColor: '#f472b6',
+  favBadge: {
+    backgroundColor: '#ef4444',
   },
   badgeText: {
     color: '#ffffff',
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 9,
+    fontWeight: 'bold',
+    paddingHorizontal: 2,
   },
 });

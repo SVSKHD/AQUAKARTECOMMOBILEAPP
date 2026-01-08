@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { triggerHaptic, triggerNotificationHaptic, triggerSelectionHaptic } from '../utils/haptics';
 import {
   Product,
   getProductImages,
@@ -36,7 +37,7 @@ export default function CartPage() {
 
   const handleIncrement = useCallback(
     (key: string, product: Product) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
       incrementItem(key, product);
     },
     [incrementItem]
@@ -44,7 +45,7 @@ export default function CartPage() {
 
   const handleDecrement = useCallback(
     (key: string) => {
-      Haptics.selectionAsync();
+      triggerSelectionHaptic();
       decrementItem(key);
     },
     [decrementItem]
@@ -52,14 +53,14 @@ export default function CartPage() {
 
   const handleRemove = useCallback(
     (key: string) => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      triggerNotificationHaptic(Haptics.NotificationFeedbackType.Warning);
       removeItem(key);
     },
     [removeItem]
   );
 
   const handleClearCart = useCallback(() => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    triggerNotificationHaptic(Haptics.NotificationFeedbackType.Warning);
     clearCart();
   }, [clearCart]);
 
@@ -90,30 +91,31 @@ export default function CartPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Your Cart</Text>
-          <Text style={styles.subtitleText}>
-            {itemCount} item{itemCount > 1 ? 's' : ''} · Subtotal ₹{subtotal.toFixed(2)}
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={handleClearCart}
-          style={styles.clearButton}
-          accessibilityRole="button"
-          accessibilityLabel="Clear cart"
-        >
-          <Ionicons name="trash-outline" size={18} color="#0C2B4E" />
-          <Text style={styles.clearButtonText}>Clear</Text>
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={entries}
         keyExtractor={(item, index) => item.key ?? `cart-item-${index}`}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        scrollIndicatorInsets={{ bottom: LIST_BOTTOM_GUTTER }}
+        scrollIndicatorInsets={{ top: 90, bottom: LIST_BOTTOM_GUTTER }}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.title}>Your Cart</Text>
+              <Text style={styles.subtitleText}>
+                {itemCount} item{itemCount > 1 ? 's' : ''} · Subtotal ₹{subtotal.toFixed(2)}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleClearCart}
+              style={styles.clearButton}
+              accessibilityRole="button"
+              accessibilityLabel="Clear cart"
+            >
+              <Ionicons name="trash-outline" size={18} color="#0C2B4E" />
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+          </View>
+        }
         renderItem={({ item, index }) => (
           <CartItem
             entry={item}
@@ -223,16 +225,18 @@ function CartItem({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 20, // Standardized
+    paddingTop: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 24, // Standardized bottom margin
   },
   title: {
-    fontSize: 26,
+    fontSize: 28, // Standardized from 26
     fontWeight: '700',
     color: '#0f172a',
   },
@@ -258,9 +262,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   listContent: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 0,
     gap: 12,
-    paddingBottom: 24,
+    paddingTop: 100, // Header space
+    paddingBottom: 40,
   },
   card: {
     flexDirection: 'row',

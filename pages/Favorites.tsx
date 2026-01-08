@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
+import { triggerHaptic, triggerNotificationHaptic, triggerSelectionHaptic } from '../utils/haptics';
 import { useFavoritesStore } from '../store/favoritesStore';
 import { Product, getProductImages, getProductTitle, getProductPrice } from '../utils/products';
 import { useCartStore } from '../store/cartStore';
@@ -43,33 +44,35 @@ export default function FavoritesPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Favourites</Text>
-          <Text style={styles.subtitle}>
-            {entries.length} saved item{entries.length > 1 ? 's' : ''}
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            clearFavorites();
-          }}
-          style={styles.clearButton}
-          accessibilityRole="button"
-          accessibilityLabel="Clear favourites"
-          activeOpacity={0.85}
-        >
-          <Ionicons name="trash-outline" size={18} color="#0C2B4E" />
-          <Text style={styles.clearButtonText}>Clear</Text>
-        </TouchableOpacity>
-      </View>
       <FlatList
         data={entries}
         keyExtractor={(item, index) => item.key ?? `favorite-${index}`}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        scrollIndicatorInsets={{ bottom: LIST_BOTTOM_GUTTER }}
+        scrollIndicatorInsets={{ top: 90, bottom: LIST_BOTTOM_GUTTER }}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.title}>Your Favourites</Text>
+              <Text style={styles.subtitle}>
+                {entries.length} saved item{entries.length > 1 ? 's' : ''}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                triggerNotificationHaptic(Haptics.NotificationFeedbackType.Warning);
+                clearFavorites();
+              }}
+              style={styles.clearButton}
+              accessibilityRole="button"
+              accessibilityLabel="Clear favourites"
+              activeOpacity={0.85}
+            >
+              <Ionicons name="trash-outline" size={18} color="#0C2B4E" />
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+          </View>
+        }
         renderItem={({ item, index }) => (
           <FavoriteCard
             entry={item}
@@ -138,7 +141,7 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
               inCart && styles.iconButtonPrimaryAdded,
             ]}
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
               onAddToCart(key, product);
             }}
             accessibilityRole="button"
@@ -158,7 +161,7 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
           <TouchableOpacity
             style={styles.iconButtonSecondary}
             onPress={() => {
-              Haptics.selectionAsync();
+              triggerSelectionHaptic();
               onRemove(key);
             }}
             accessibilityRole="button"
@@ -176,16 +179,18 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 20, // Standardized
+    paddingTop: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 24, // Standardized bottom margin
   },
   title: {
-    fontSize: 26,
+    fontSize: 28, // Standardized from 26
     fontWeight: '700',
     color: '#0f172a',
   },
@@ -211,15 +216,18 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   listContent: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 0,
     gap: 12,
-    paddingBottom: 24,
+    paddingTop: 100, // Header space
+    paddingBottom: 40,
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderRadius: 18,
+    backgroundColor: '#ffffff', // Cart uses #fdfefe but #fff is fine standard
+    borderRadius: 16, // Standardized from 18
     padding: 14,
+    borderWidth: StyleSheet.hairlineWidth, // Added border
+    borderColor: '#e2e8f0', // Added border color
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -229,9 +237,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   thumbnail: {
-    width: 70,
-    height: 70,
-    borderRadius: 14,
+    width: 72, // Match Cart 72
+    height: 72, // Match Cart 72
+    borderRadius: 12, // Standardized from 14
     backgroundColor: '#e2e8f0',
   },
   thumbnailPlaceholder: {
@@ -243,8 +251,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17, // Match Cart 17 (was 16)
+    fontWeight: '600',
     color: '#0f172a',
   },
   metaRow: {
@@ -253,7 +261,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cardPrice: {
-    fontSize: 15,
+    fontSize: 15, // Match Cart Quantity Text approx or Keep as is? Cart uses 14/15. 15 is good.
     fontWeight: '600',
     color: '#0C2B4E',
   },

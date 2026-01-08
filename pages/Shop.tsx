@@ -1,3 +1,4 @@
+// ... imports remain the same, ensuring Haptics and Icons are there
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,22 +9,30 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { triggerHaptic, triggerSelectionHaptic } from '../utils/haptics';
 import { fetchProducts } from '../services/products';
 import {
   Product,
-  getProductDescription,
   getProductImages,
   getProductKey,
   getProductPrice,
   getProductTitle,
+  getProductDescription,
 } from '../utils/products';
 import { useCartStore } from '../store/cartStore';
 import { useFavoritesStore } from '../store/favoritesStore';
 
 const LIST_BOTTOM_GUTTER = 112;
+const SKELETON_PLACEHOLDERS = Array.from({ length: 6 }, (_, index) => index);
+const { width } = Dimensions.get('window');
+const CONTENT_PADDING = 20; // Standardized to 20px
+const COLUMN_GAP = 12;
+const CARD_WIDTH = (width - (CONTENT_PADDING * 2) - COLUMN_GAP) / 2;
 
 function normalizeProducts(payload: unknown): Product[] {
   if (!payload) {
@@ -95,7 +104,7 @@ export default function ShopPage() {
 
   const handleAddToCart = useCallback(
     (productKey: string, product: Product) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
       incrementItem(productKey, product);
     },
     [incrementItem]
@@ -108,14 +117,16 @@ export default function ShopPage() {
 
   const handleToggleFavorite = useCallback(
     (productKey: string, product: Product) => {
-      Haptics.selectionAsync();
+      triggerSelectionHaptic();
       toggleFavorite(productKey, product);
     },
     [toggleFavorite]
   );
 
+  const isInitialLoading = loading && products.length === 0;
+
   const listEmptyComponent = useMemo(() => {
-    if (loading) {
+    if (isInitialLoading) {
       return null;
     }
 
@@ -132,148 +143,141 @@ export default function ShopPage() {
         <Text style={styles.emptyText}>No products found.</Text>
       </View>
     );
-  }, [loading, error]);
+  }, [isInitialLoading, error]);
 
-  if (loading) {
-    return (
-      <View style={styles.loaderWrapper}>
-        <ActivityIndicator size="large" color="#0C2B4E" />
-        <Text style={styles.loaderText}>Loading products...</Text>
-      </View>
-    );
-  }
+  const dataSource = isInitialLoading ? SKELETON_PLACEHOLDERS : products;
 
   return (
-    <FlatList
-      data={products}
+    <FlatList<Product | number>
+      data={dataSource}
       style={styles.list}
+      numColumns={2}
+      columnWrapperStyle={styles.columnWrapper}
+      contentContainerStyle={
+        dataSource.length === 0
+          ? styles.emptyListContainer
+          : styles.listContent
+      }
       scrollIndicatorInsets={{ bottom: LIST_BOTTOM_GUTTER }}
       keyExtractor={(item, index) =>
-        getProductKey(item, index)
+        isInitialLoading ? `skeleton-${index}` : getProductKey(item as Product, index)
       }
       renderItem={({ item, index }) => {
-        const title = getProductTitle(item, index);
-        const price = getProductPrice(item);
-        const imageUrls = getProductImages(item);
-        const description = getProductDescription(item);
+        if (isInitialLoading) {
+          return <ProductLoadingCard />;
+        }
+
+        const product = item as Product;
+        const title = getProductTitle(product, index);
+        const price = getProductPrice(product);
+        const imageUrls = getProductImages(product);
         const hasImages = imageUrls.length > 0;
-        const productKey = getProductKey(item, index);
+        const productKey = getProductKey(product, index);
         const isFavorite = Boolean(favoriteItems[productKey]);
         const quantity = cartItems[productKey]?.quantity ?? 0;
         const inCart = quantity > 0;
 
         return (
           <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.productTitle} numberOfLines={1}>
-                {title}
-              </Text>
+            <View style={styles.imageContainer}>
+              {hasImages ? (
+                <Image
+                  source={{ uri: imageUrls[0] }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={[styles.image, styles.imagePlaceholder]}>
+                  <Text style={styles.imagePlaceholderText}>No Image</Text>
+                </View>
+              )}
               <TouchableOpacity
-                onPress={() => handleToggleFavorite(productKey, item)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  isFavorite ? 'Remove from favourites' : 'Add to favourites'
-                }
+                onPress={() => handleToggleFavorite(productKey, product)}
                 style={styles.favoriteButton}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons
                   name={isFavorite ? 'heart' : 'heart-outline'}
-                  size={22}
+                  size={20}
                   color={isFavorite ? '#dc2626' : '#0f172a'}
                 />
               </TouchableOpacity>
             </View>
-            {hasImages ? (
-              <ProductCarousel images={imageUrls} />
-            ) : (
-              <View style={[styles.image, styles.imagePlaceholder]}>
-                <Text style={styles.imagePlaceholderText}>No Image</Text>
-              </View>
-            )}
+
             <View style={styles.cardContent}>
-              <Text style={styles.description} numberOfLines={2}>
-                {description}
+              <Text style={styles.productTitle} numberOfLines={2}>
+                {title}
               </Text>
-              {price !== null && (
-                <Text style={styles.price}>₹{price.toFixed(2)}</Text>
-              )}
-              <View style={styles.cardFooter}>
-                <TouchableOpacity
-                  onPress={() => handleAddToCart(productKey, item)}
-                  style={[
-                    styles.cartButton,
-                    inCart && styles.cartButtonAdded,
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    inCart ? 'Add one more to cart' : 'Add to cart'
-                  }
-                  activeOpacity={0.85}
-                >
-                  <Ionicons
-                    name="cart-outline"
-                    size={18}
-                    color={inCart ? '#0C2B4E' : '#ffffff'}
-                  />
-                  <Text
-                    style={[
-                      styles.cartButtonText,
-                      inCart && styles.cartButtonTextAdded,
-                    ]}
-                  >
-                    {inCart ? `Add More (${quantity})` : 'Add to Cart'}
-                  </Text>
-                </TouchableOpacity>
+
+              <View style={styles.priceRow}>
+                {price !== null && (
+                  <Text style={styles.price}>₹{price.toFixed(0)}</Text>
+                )}
+                {inCart && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{quantity}</Text>
+                  </View>
+                )}
               </View>
+
+              <TouchableOpacity
+                onPress={() => handleAddToCart(productKey, product)}
+                style={[
+                  styles.cartButton,
+                  inCart && styles.cartButtonAdded,
+                ]}
+                activeOpacity={0.85}
+              >
+                <Ionicons
+                  name={inCart ? "add" : "cart-outline"}
+                  size={16}
+                  color={inCart ? '#0C2B4E' : '#ffffff'}
+                />
+                <Text
+                  style={[
+                    styles.cartButtonText,
+                    inCart && styles.cartButtonTextAdded,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {inCart ? 'Add' : 'Add'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         );
       }}
-      contentContainerStyle={
-        products.length === 0
-          ? styles.emptyListContainer
-          : styles.listContent
-      }
       refreshing={refreshing}
       onRefresh={handleRefresh}
       ListEmptyComponent={listEmptyComponent}
-      ListFooterComponent={<View style={styles.footerSpacer} />}
+      ListFooterComponent={
+        !isInitialLoading && products.length > 0 ? (
+          <View style={styles.footerSpacer} />
+        ) : null
+      }
     />
   );
 }
 
-function ProductCarousel({ images }: { images: string[] }) {
+function ProductLoadingCard() {
   return (
-    <ScrollView
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      style={styles.carousel}
-      contentContainerStyle={styles.carouselContent}
-    >
-      {images.map((uri, index) => (
-        <Image
-          key={`${uri}-${index}`}
-          source={{ uri }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-      ))}
-    </ScrollView>
+    <View style={[styles.card, styles.skeletonCard]}>
+      <View style={[styles.image, styles.skeletonImage]}>
+        <ActivityIndicator size="small" color="#0C2B4E" />
+      </View>
+      <View style={styles.skeletonContent}>
+        <View style={[styles.skeletonBlock, styles.skeletonTitle]} />
+        <View style={[styles.skeletonBlock, styles.skeletonLine]} />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  loaderWrapper: {
+  container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  loaderText: {
-    fontSize: 16,
-    color: '#0f172a',
+    backgroundColor: 'transparent',
+    paddingTop: Platform.OS === 'android' ? 16 : 0,
   },
   messageWrapper: {
     paddingVertical: 48,
@@ -291,56 +295,75 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listContent: {
-    paddingTop: 12,
+    paddingTop: 100, // Header space
     paddingBottom: LIST_BOTTOM_GUTTER,
-    paddingHorizontal: 12,
-    gap: 12,
+    paddingHorizontal: CONTENT_PADDING,
+    gap: 16,
   },
   list: {
     flex: 1,
   },
+  columnWrapper: {
+    gap: COLUMN_GAP,
+    marginBottom: COLUMN_GAP,
+  },
   emptyListContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: CONTENT_PADDING,
     paddingBottom: LIST_BOTTOM_GUTTER,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 2,
-    marginHorizontal: 4,
+    flex: 1,
+    maxWidth: CARD_WIDTH,
+    width: CARD_WIDTH,
   },
-  cardHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e2e8f0',
+  skeletonCard: {
+    opacity: 0.95,
   },
-  favoriteButton: {
+  skeletonBlock: {
+    backgroundColor: '#e2e8f0',
+    borderRadius: 6,
+  },
+  skeletonTitle: {
+    width: '80%',
+    height: 14,
+    marginBottom: 6,
+  },
+  skeletonImage: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 4,
+  },
+  skeletonContent: {
+    padding: 12,
+  },
+  skeletonLine: {
+    width: '40%',
+    height: 12,
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 20,
+    padding: 6,
   },
   image: {
     width: '100%',
-    height: 180,
-    backgroundColor: '#e2e8f0',
-  },
-  carousel: {
-    width: '100%',
-  },
-  carouselContent: {
-    flexGrow: 1,
+    height: 140,
+    backgroundColor: '#f1f5f9',
   },
   imagePlaceholder: {
     alignItems: 'center',
@@ -348,42 +371,50 @@ const styles = StyleSheet.create({
   },
   imagePlaceholderText: {
     color: '#64748b',
-    fontSize: 14,
+    fontSize: 12,
   },
   cardContent: {
-    padding: 16,
-    paddingTop: 12,
-    gap: 8,
+    padding: 10,
+    gap: 6,
   },
   productTitle: {
-    flex: 1,
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: '600',
     color: '#0f172a',
+    lineHeight: 18,
+    height: 36, // Fixed height for 2 lines
   },
-  description: {
-    fontSize: 14,
-    color: '#475569',
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
   price: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#0C2B4E',
-    marginTop: 8,
   },
-  cardFooter: {
-    marginTop: 12,
-    width: '100%',
+  badge: {
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0984e3',
   },
   cartButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: '#0C2B4E',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    gap: 6,
   },
   cartButtonAdded: {
     backgroundColor: '#e2f0ff',
@@ -392,10 +423,9 @@ const styles = StyleSheet.create({
   },
   cartButtonText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.6,
   },
   cartButtonTextAdded: {
     color: '#0C2B4E',
