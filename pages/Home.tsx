@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-    paddingTop: 100,    // Space for floating header
+    paddingTop: 140,    // Increased spacing for header
     paddingBottom: 120, // Space for floating tab bar
     gap: 28,
   },
@@ -143,7 +143,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0f172a',
+    color: 'white',
+
   },
   highlightList: {
     gap: 12,

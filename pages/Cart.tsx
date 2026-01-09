@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
 import { triggerHaptic, triggerNotificationHaptic, triggerSelectionHaptic } from '../utils/haptics';
 import {
   Product,
@@ -79,7 +80,7 @@ export default function CartPage() {
   if (itemCount === 0) {
     return (
       <View style={styles.emptyState}>
-        <Ionicons name="cart-outline" size={42} color="#64748b" />
+        <Ionicons name="cart-outline" size={42} color="rgba(255,255,255,0.4)" />
         <Text style={styles.emptyTitle}>Your cart is empty</Text>
         <Text style={styles.emptySubtitle}>
           Browse products in the Shop tab and tap “Add to Cart” to collect your
@@ -100,7 +101,7 @@ export default function CartPage() {
         ListHeaderComponent={
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>Your Cart</Text>
+              {/* Title moved to global header */}
               <Text style={styles.subtitleText}>
                 {itemCount} item{itemCount > 1 ? 's' : ''} · Subtotal ₹{subtotal.toFixed(2)}
               </Text>
@@ -111,7 +112,7 @@ export default function CartPage() {
               accessibilityRole="button"
               accessibilityLabel="Clear cart"
             >
-              <Ionicons name="trash-outline" size={18} color="#0C2B4E" />
+              <Ionicons name="trash-outline" size={18} color="#fca5a5" />
               <Text style={styles.clearButtonText}>Clear</Text>
             </TouchableOpacity>
           </View>
@@ -163,7 +164,7 @@ function CartItem({
     typeof price === 'number' ? price.toFixed(2) : null;
 
   return (
-    <View style={styles.card}>
+    <BlurView intensity={20} tint="dark" style={styles.card}>
       {imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.thumbnail} />
       ) : (
@@ -195,7 +196,7 @@ function CartItem({
               accessibilityLabel="Decrease quantity"
               activeOpacity={0.8}
             >
-              <Ionicons name="remove" size={18} color="#0C2B4E" />
+              <Ionicons name="remove" size={18} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.quantityText}>{quantity}</Text>
             <TouchableOpacity
@@ -205,7 +206,7 @@ function CartItem({
               accessibilityLabel="Increase quantity"
               activeOpacity={0.8}
             >
-              <Ionicons name="add" size={18} color="#0C2B4E" />
+              <Ionicons name="add" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
         </View>
@@ -216,9 +217,9 @@ function CartItem({
         accessibilityRole="button"
         accessibilityLabel="Remove item from cart"
       >
-        <Ionicons name="close-circle" size={22} color="#dc2626" />
+        <Ionicons name="close-circle" size={22} color="#f87171" />
       </TouchableOpacity>
-    </View>
+    </BlurView>
   );
 }
 
@@ -233,29 +234,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24, // Standardized bottom margin
+    marginBottom: 12, // Reduced from 24
   },
-  title: {
-    fontSize: 28, // Standardized from 26
-    fontWeight: '700',
-    color: '#0f172a',
-  },
+
   subtitleText: {
     marginTop: 4,
     fontSize: 14,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
   },
   clearButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#e2f0ff',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
   },
   clearButtonText: {
-    color: '#0C2B4E',
+    color: '#fca5a5',
     fontSize: 14,
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -264,35 +263,30 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 0,
     gap: 12,
-    paddingTop: 100, // Header space
+    paddingTop: 140, // Increased spacing for header
     paddingBottom: 40,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fdfefe',
     borderRadius: 16,
     padding: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    overflow: 'hidden', // Needed for BlurView borderRadius
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   thumbnail: {
     width: 72,
     height: 72,
     borderRadius: 12,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   thumbnailPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   thumbnailPlaceholderText: {
-    color: '#64748b',
+    color: 'rgba(255,255,255,0.5)',
     fontSize: 12,
   },
   cardContent: {
@@ -308,13 +302,15 @@ const styles = StyleSheet.create({
   productTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   priceTag: {
-    backgroundColor: '#0C2B4E',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   priceTagText: {
     color: '#ffffff',
@@ -324,7 +320,7 @@ const styles = StyleSheet.create({
   unitPrice: {
     marginTop: 6,
     fontSize: 13,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
     fontWeight: '500',
   },
   quantityRow: {
@@ -338,33 +334,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#dbeafe',
+    borderColor: 'rgba(255,255,255,0.2)',
     overflow: 'hidden',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   qtyButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#f1f5ff',
+    backgroundColor: 'rgba(255,255,255,0.0)',
   },
   qtyButtonLeft: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#cbd5f5',
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(255,255,255,0.2)',
   },
   qtyButtonRight: {
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: '#cbd5f5',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255,255,255,0.2)',
   },
   quantityText: {
     paddingHorizontal: 16,
     fontSize: 15,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   quantityLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#0f172a',
+    color: 'rgba(255,255,255,0.7)',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
@@ -381,11 +377,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   emptySubtitle: {
     fontSize: 15,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     lineHeight: 21,
   },

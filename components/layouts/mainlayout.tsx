@@ -1,14 +1,19 @@
 import { useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { selectCartCount, useCartStore } from '../../store/cartStore';
-import { selectFavoriteCount, useFavoritesStore } from '../../store/favoritesStore';
-import { triggerHaptic } from '../../utils/haptics';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TouchableOpacity } from 'react-native';
+
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, TouchableOpacity, View, Text } from 'react-native';
-import { TabKey } from "../types/layout"
+import { LinearGradient } from 'expo-linear-gradient';
+
+import { selectCartCount, useCartStore } from '../../store/cartStore';
+import { selectFavoriteCount, useFavoritesStore } from '../../store/favoritesStore';
+import { triggerHaptic } from '../../utils/haptics';
+
+import { TabKey } from '../types/layout';
+import AquaHeader from './header';
+import AquaFooter from './footer';
 
 import HomePage from '../../pages/Home';
 import ShopPage from '../../pages/Shop';
@@ -31,110 +36,57 @@ const TABS: TabConfig[] = [
     { key: 'profile', label: 'Profile', icon: 'person-outline', activeIcon: 'person' },
 ];
 
-
-
-
-function MainLayout({ onLogout, styles }: { onLogout: () => void, styles: any }) {
+function MainLayout({ onLogout, styles }: { onLogout: () => void; styles: any }) {
     const [activeTab, setActiveTab] = useState<TabKey>('home');
     const insets = useSafeAreaInsets();
     const cartCount = useCartStore(selectCartCount);
     const favoriteCount = useFavoritesStore(selectFavoriteCount);
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={['top']}>
-            <View style={styles.headerContainer}>
-                <BlurView intensity={30} tint="dark" style={styles.header}>
-                    <Image
-                        source={require('../../assets/logo-white.png')}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-
-                    <TouchableOpacity
-                        onPress={() => {
-                            triggerHaptic();
-                            onLogout();
-                        }}
-                        style={styles.logoutButton}
-                        activeOpacity={0.9}
-                        accessibilityRole="button"
-                        accessibilityLabel="Logout"
-                    >
-                        <Ionicons name="log-out-outline" size={20} color="#B9A7FF" />
-                    </TouchableOpacity>
-                </BlurView>
-            </View>
-
-            <View style={styles.content}>
-                <Animated.View
-                    key={activeTab}
-                    entering={FadeIn.duration(280).springify()}
-                    exiting={FadeOut.duration(180)}
-                    style={{ flex: 1 }}
-                >
-                    {activeTab === 'home' && <HomePage onBrowsePress={() => setActiveTab('shop')} />}
-                    {activeTab === 'shop' && <ShopPage />}
-                    {activeTab === 'favorites' && <FavoritesPage />}
-                    {activeTab === 'cart' && <CartPage />}
-                    {activeTab === 'profile' && <ProfilePage />}
-                </Animated.View>
-            </View>
-
-            {/* Bottom Nav (iOS pill style + safe above home indicator) */}
-            <View
-                style={[
-                    styles.tabBarContainer,
-                    {
-                        paddingBottom: insets.bottom,   // keep safe-area correct
-                        transform: [{ translateY: 19 }], // 👈 pulls bar DOWN closer to home bar
-                    },
-                ]}
-                pointerEvents="box-none"
+        // ✅ SafeAreaView should own edges + flex
+        <SafeAreaView style={{ flex: 1 }} edges={[]}>
+            {/* ✅ Gradient fills screen (LinearGradient is NOT a SafeAreaView) */}
+            <LinearGradient
+                colors={['#24243e', '#302b63', '#0f0c29']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ flex: 1 }}
             >
-                <BlurView intensity={35} tint="dark" style={styles.tabBar}>
-                    {TABS.map((tab) => {
-                        const isActive = tab.key === activeTab;
+                {/* Header */}
+                <View style={styles.headerContainer}>
+                    <AquaHeader
+                        onLogout={onLogout}
+                        headerText={activeTab === 'cart' || activeTab === 'favorites' || activeTab === 'shop'}
+                        onBack={activeTab !== 'home' ? () => setActiveTab('home') : undefined}
+                        headerContent={
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', letterSpacing: 0.5 }}>
+                                {activeTab === 'cart' ? 'Cart' : activeTab === 'favorites' ? 'Favourites' : activeTab === 'shop' ? 'Shop' : ''}
+                            </Text>
+                        }
+                    />
+                </View>
 
-                        return (
-                            <TouchableOpacity
-                                key={tab.key}
-                                onPress={() => {
-                                    triggerHaptic();
-                                    setActiveTab(tab.key);
-                                }}
-                                activeOpacity={0.9}
-                                accessibilityRole="button"
-                                accessibilityLabel={`${tab.label} tab`}
-                                accessibilityState={{ selected: isActive }}
-                                style={isActive ? styles.tabActivePill : styles.tabIconCircle}
-                            >
-                                <View style={styles.iconWrapper}>
-                                    <Ionicons
-                                        name={isActive ? tab.activeIcon : tab.icon}
-                                        size={22}
-                                        color={isActive ? '#B9A7FF' : 'rgba(255,255,255,0.92)'}
-                                    />
+                {/* Content */}
+                <View style={styles.content}>
+                    <Animated.View
+                        key={activeTab}
+                        entering={FadeIn.duration(280).springify()}
+                        exiting={FadeOut.duration(180)}
+                        style={{ flex: 1 }}
+                    >
+                        {activeTab === 'home' && <HomePage onBrowsePress={() => setActiveTab('shop')} />}
+                        {activeTab === 'shop' && <ShopPage />}
+                        {activeTab === 'favorites' && <FavoritesPage />}
+                        {activeTab === 'cart' && <CartPage />}
+                        {activeTab === 'profile' && <ProfilePage />}
+                    </Animated.View>
+                </View>
 
-                                    {tab.key === 'cart' && cartCount > 0 && (
-                                        <View style={[styles.badge, styles.cartBadge]}>
-                                            <Text style={styles.badgeText}>{cartCount}</Text>
-                                        </View>
-                                    )}
-
-                                    {tab.key === 'favorites' && favoriteCount > 0 && (
-                                        <View style={[styles.badge, styles.favBadge]}>
-                                            <Text style={styles.badgeText}>{favoriteCount}</Text>
-                                        </View>
-                                    )}
-                                </View>
-
-                                {isActive && <Text style={styles.activeLabel}>{tab.label}</Text>}
-                            </TouchableOpacity>
-                        );
-                    })}
-                </BlurView>
-            </View>
+                {/* Bottom Nav */}
+                <AquaFooter styles={styles} insets={insets} activeTab={activeTab} setActiveTab={setActiveTab} cartCount={cartCount} favoriteCount={favoriteCount} />
+            </LinearGradient>
         </SafeAreaView>
     );
 }
+
 export default MainLayout;

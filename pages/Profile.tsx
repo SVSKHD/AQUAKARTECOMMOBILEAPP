@@ -20,10 +20,13 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { triggerHaptic, triggerNotificationHaptic, triggerSelectionHaptic } from '../utils/haptics';
 import { useCartStore } from '../store/cartStore';
 import { Product, getProductImages, getProductPrice, getProductTitle } from '../utils/products';
 import * as Haptics from 'expo-haptics';
+
 // Or react-native Image if that was used. Checking Cart.tsx... it used react-native Image. I should stick to that or standard. Cart.tsx used: import { Image } from 'react-native';
 // Wait, Cart.tsx imported Image from react-native. Profile.tsx doesn't use Image yet.
 // I need to import Image from react-native.
@@ -374,7 +377,12 @@ type ProfileHeaderProps = {
 function ProfileHeader({ activeTab, onTabPress, user }: ProfileHeaderProps) {
   return (
     <View style={styles.headerContainer}>
-      <View style={styles.heroCard}>
+      <LinearGradient
+        colors={['#0C2B4E', '#1e40af']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.heroCard}
+      >
         <View>
           <Text style={styles.greeting}>Hello, {user.firstName}</Text>
           <Text style={styles.heroTitle}>
@@ -384,9 +392,9 @@ function ProfileHeader({ activeTab, onTabPress, user }: ProfileHeaderProps) {
         <Text style={styles.heroSubtitle}>
           Review recent orders, revisit favourites, and keep your delivery information up to date.
         </Text>
-      </View>
+      </LinearGradient>
 
-      <View style={styles.tabBar}>
+      <BlurView intensity={20} tint="dark" style={styles.tabBar}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -404,12 +412,12 @@ function ProfileHeader({ activeTab, onTabPress, user }: ProfileHeaderProps) {
               <Ionicons
                 name={tab.icon}
                 size={18}
-                color={isActive ? '#0C2B4E' : '#64748b'}
+                color={isActive ? '#ffffff' : 'rgba(255,255,255,0.6)'}
               />
             </TouchableOpacity>
           );
         })}
-      </View>
+      </BlurView>
     </View>
   );
 }
@@ -420,7 +428,7 @@ type OrderCardProps = {
 
 function OrderCard({ order }: OrderCardProps) {
   return (
-    <View style={styles.orderCard}>
+    <BlurView intensity={20} tint="dark" style={styles.orderCard}>
       <View style={styles.orderHeader}>
         <View>
           <Text style={styles.orderId}>Order {order.id}</Text>
@@ -443,7 +451,7 @@ function OrderCard({ order }: OrderCardProps) {
             <Ionicons
               name={item.favorite ? 'heart' : 'water-outline'}
               size={16}
-              color={item.favorite ? '#f472b6' : '#0C2B4E'}
+              color={item.favorite ? '#f472b6' : '#ffffff'}
             />
             <View style={styles.orderItemContent}>
               <Text style={styles.orderItemTitle}>{item.name}</Text>
@@ -458,7 +466,7 @@ function OrderCard({ order }: OrderCardProps) {
         <Text style={styles.orderTotalLabel}>Total</Text>
         <Text style={styles.orderTotalValue}>₹{order.total.toFixed(2)}</Text>
       </View>
-    </View>
+    </BlurView>
   );
 }
 
@@ -468,9 +476,9 @@ type FavoriteCardProps = {
 
 function FavoriteCard({ favourite }: FavoriteCardProps) {
   return (
-    <View style={styles.favoriteCard}>
+    <BlurView intensity={20} tint="dark" style={styles.favoriteCard}>
       <View style={styles.favoriteIconWrap}>
-        <Ionicons name='water' size={22} color='#0C2B4E' />
+        <Ionicons name='water' size={22} color='#ffffff' />
       </View>
       <View style={styles.favoriteContent}>
         <Text style={styles.favoriteTitle}>{favourite.item.name}</Text>
@@ -478,7 +486,7 @@ function FavoriteCard({ favourite }: FavoriteCardProps) {
           Last ordered in {favourite.orderId} · {favourite.placedOn}
         </Text>
       </View>
-    </View>
+    </BlurView>
   );
 }
 
@@ -490,28 +498,28 @@ type AboutCardProps = {
 function AboutCard({ user, onEditPress }: AboutCardProps) {
   const fullName = `${user.lastName} ${user.firstName}`;
   return (
-    <View style={styles.aboutCard}>
+    <BlurView intensity={20} tint="dark" style={styles.aboutCard}>
       <Text style={styles.aboutTitle}>Account Details</Text>
       <View style={styles.aboutRow}>
-        <Ionicons name='person-outline' size={18} color='#0C2B4E' />
+        <Ionicons name='person-outline' size={18} color='rgba(255,255,255,0.7)' />
         <Text style={styles.aboutValue}>{fullName}</Text>
       </View>
       <View style={styles.aboutRow}>
-        <Ionicons name='mail-outline' size={18} color='#0C2B4E' />
+        <Ionicons name='mail-outline' size={18} color='rgba(255,255,255,0.7)' />
         <Text style={styles.aboutValue}>{user.email}</Text>
       </View>
       <View style={styles.aboutRow}>
-        <Ionicons name='call-outline' size={18} color='#0C2B4E' />
+        <Ionicons name='call-outline' size={18} color='rgba(255,255,255,0.7)' />
         <Text style={styles.aboutValue}>{user.phone}</Text>
       </View>
       {user.altPhone ? (
         <View style={styles.aboutRow}>
-          <Ionicons name='call' size={18} color='#0C2B4E' />
+          <Ionicons name='call' size={18} color='rgba(255,255,255,0.7)' />
           <Text style={styles.aboutValue}>{user.altPhone}</Text>
         </View>
       ) : null}
       <View style={styles.aboutRowAddress}>
-        <Ionicons name='location-outline' size={18} color='#0C2B4E' />
+        <Ionicons name='location-outline' size={18} color='rgba(255,255,255,0.7)' />
         <View style={styles.addressBlock}>
           <Text style={styles.aboutValue}>Saved Addresses</Text>
           <View style={styles.aboutAddressList}>
@@ -527,9 +535,9 @@ function AboutCard({ user, onEditPress }: AboutCardProps) {
                       </View>
                     ) : null}
                   </View>
-                  <Text style={styles.aboutValue}>{address.line1}</Text>
-                  {address.line2 ? <Text style={styles.aboutValue}>{address.line2}</Text> : null}
-                  <Text style={styles.aboutValue}>
+                  <Text style={[styles.aboutValue, { color: 'rgba(255,255,255,0.9)' }]}>{address.line1}</Text>
+                  {address.line2 ? <Text style={[styles.aboutValue, { color: 'rgba(255,255,255,0.9)' }]}>{address.line2}</Text> : null}
+                  <Text style={[styles.aboutValue, { color: 'rgba(255,255,255,0.9)' }]}>
                     {address.city}, {address.state} {address.postalCode}
                   </Text>
                 </View>
@@ -548,11 +556,11 @@ function AboutCard({ user, onEditPress }: AboutCardProps) {
           accessibilityRole='button'
           accessibilityLabel='Edit profile details'
         >
-          <Ionicons name='create-outline' size={16} color='#0C2B4E' />
+          <Ionicons name='create-outline' size={16} color='#ffffff' />
           <Text style={styles.editButtonText}>Edit details</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </BlurView>
   );
 }
 
@@ -560,7 +568,7 @@ function EmptyFavorites() {
   return (
     <View style={styles.emptyWrapper}>
       <View style={styles.emptyState}>
-        <Ionicons name='heart-outline' size={44} color='#0C2B4E' />
+        <Ionicons name='heart-outline' size={44} color='rgba(255,255,255,0.4)' />
         <Text style={styles.emptyTitle}>No favourites yet</Text>
         <Text style={styles.emptySubtitle}>
           Mark items as favourite in your orders to see them here.
@@ -605,110 +613,40 @@ function createFormState(user: UserDetails): EditProfileFormState {
   };
 }
 
-function EditProfileDrawer({ visible, onClose, onSave, user }: EditProfileDrawerProps) {
+
+import { DraggableDrawer } from '../components/drawer';
+
+
+export function EditProfileDrawer({ visible, onClose, onSave, user }: EditProfileDrawerProps) {
   const [formState, setFormState] = useState(() => createFormState(user));
   const [error, setError] = useState<string | null>(null);
 
-  // Animations
-  const translateY = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const dragging = useRef(false);
-
   useEffect(() => {
-    if (visible) {
-      translateY.setValue(600);
-      fadeAnim.setValue(0);
-      dragging.current = false;
-      setFormState(createFormState(user));
-      setError(null);
-
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(translateY, {
-          toValue: 0,
-          useNativeDriver: true,
-          bounciness: 4,
-        })
-      ]).start();
-    }
+    if (!visible) return;
+    setFormState(createFormState(user));
+    setError(null);
   }, [visible, user]);
 
   const handleClose = useCallback(() => {
     setError(null);
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 800,
-        duration: 250,
-        useNativeDriver: true,
-      })
-    ]).start(() => {
-      onClose();
-    });
+    onClose();
   }, [onClose]);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, { dy }) => {
-        return dy > 10;
-      },
-      onPanResponderGrant: () => {
-        dragging.current = true;
-      },
-      onPanResponderMove: (_, { dy }) => {
-        if (dy > 0) {
-          translateY.setValue(dy);
-        }
-      },
-      onPanResponderRelease: (_, { dy, vy }) => {
-        dragging.current = false;
-        if (dy > 150 || vy > 0.5) {
-          handleClose();
-        } else {
-          Animated.spring(translateY, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      }
-    })
-  ).current;
-
   const handleInputChange = useCallback((key: keyof EditProfileFormState, value: string) => {
-    setFormState((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFormState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const handleAddressChange = useCallback(
-    (id: string, key: keyof Address, value: string) => {
-      setFormState((prev) => ({
-        ...prev,
-        addresses: prev.addresses.map((address) =>
-          address.id === id ? { ...address, [key]: value } : address,
-        ),
-      }));
-    },
-    [],
-  );
+  const handleAddressChange = useCallback((id: string, key: keyof Address, value: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      addresses: prev.addresses.map((a) => (a.id === id ? { ...a, [key]: value } : a)),
+    }));
+  }, []);
 
   const handleSetDefaultAddress = useCallback((id: string) => {
     setFormState((prev) => ({
       ...prev,
-      addresses: prev.addresses.map((address) => ({
-        ...address,
-        isDefault: address.id === id,
-      })),
+      addresses: prev.addresses.map((a) => ({ ...a, isDefault: a.id === id })),
     }));
   }, []);
 
@@ -725,11 +663,12 @@ function EditProfileDrawer({ visible, onClose, onSave, user }: EditProfileDrawer
         postalCode: '',
         isDefault: isFirstAddress,
       };
+
       const addresses = [...prev.addresses, newAddress];
       return {
         ...prev,
         addresses: isFirstAddress
-          ? addresses.map((address) => ({ ...address, isDefault: address.id === newAddress.id }))
+          ? addresses.map((a) => ({ ...a, isDefault: a.id === newAddress.id }))
           : addresses,
       };
     });
@@ -738,19 +677,18 @@ function EditProfileDrawer({ visible, onClose, onSave, user }: EditProfileDrawer
   const handleRemoveAddress = useCallback((id: string) => {
     setFormState((prev) => {
       if (prev.addresses.length === 1) return prev;
-      const remaining = prev.addresses.filter((address) => address.id !== id);
+
+      const remaining = prev.addresses.filter((a) => a.id !== id);
       if (remaining.length === 0) return prev;
 
-      if (!remaining.some((address) => address.isDefault)) {
+      if (!remaining.some((a) => a.isDefault)) {
         const [first, ...rest] = remaining;
         return {
           ...prev,
-          addresses: [
-            { ...first, isDefault: true },
-            ...rest.map((address) => ({ ...address, isDefault: false })),
-          ],
+          addresses: [{ ...first, isDefault: true }, ...rest.map((a) => ({ ...a, isDefault: false }))],
         };
       }
+
       return { ...prev, addresses: remaining };
     });
   }, []);
@@ -770,36 +708,26 @@ function EditProfileDrawer({ visible, onClose, onSave, user }: EditProfileDrawer
         const city = address.city.trim();
         const state = address.state.trim();
         const postalCode = address.postalCode.trim();
-
-        return {
-          ...address,
-          label,
-          line1,
-          line2,
-          city,
-          state,
-          postalCode,
-        };
+        return { ...address, label, line1, line2, city, state, postalCode };
       })
-      .filter((address) => address.line1.length > 0 || address.city.length > 0);
+      .filter((a) => a.line1.length > 0 || a.city.length > 0);
 
     if (!firstName || !email || !phone) {
       setError('First name, email, and primary phone are required.');
       return;
     }
-
     if (normalizedAddresses.length === 0) {
       setError('Add at least one address with street details.');
       return;
     }
 
-    let defaultIndex = normalizedAddresses.findIndex((address) => address.isDefault);
+    let defaultIndex = normalizedAddresses.findIndex((a) => a.isDefault);
     if (defaultIndex === -1) defaultIndex = 0;
 
-    const preparedAddresses = normalizedAddresses.map((address, index) => ({
-      ...address,
+    const preparedAddresses = normalizedAddresses.map((a, index) => ({
+      ...a,
       isDefault: index === defaultIndex,
-      line2: address.line2.length ? address.line2 : undefined,
+      line2: a.line2.length ? a.line2 : undefined,
     }));
 
     const payload: UserDetails = {
@@ -816,239 +744,197 @@ function EditProfileDrawer({ visible, onClose, onSave, user }: EditProfileDrawer
     onSave(payload);
   }, [formState, onSave, user]);
 
-  if (!visible) return null;
-
   return (
-    <Modal visible={visible} transparent onRequestClose={handleClose}>
-      <Animated.View
-        style={[
-          styles.drawerBackdrop,
-          { opacity: fadeAnim }
-        ]}
+    <DraggableDrawer
+      visible={visible}
+      onClose={handleClose}
+      title="Edit profile"
+      subtitle="Update your contact information and saved addresses. Changes apply instantly."
+      onDone={handleSubmit}
+      doneLabel="Save"
+    >
+      <ScrollView
+        style={styles.drawerScroll}
+        contentContainerStyle={styles.drawerContent}
+        showsVerticalScrollIndicator={false}
       >
-        <Pressable style={styles.backdropPressable} onPress={handleClose} />
-      </Animated.View>
+        {/* ---- your exact UI stays same below ---- */}
 
-      <Animated.View
-        style={[
-          styles.drawerContainer,
-          {
-            position: 'absolute',
-            bottom: 0,
-            transform: [{ translateY }]
-          }
-        ]}
-      >
-        <View style={styles.drawerShell}>
-          <View
-            style={styles.drawerHandle}
-            {...panResponder.panHandlers}
+        <View style={styles.formRow}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>First name</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formState.firstName}
+              onChangeText={(value) => handleInputChange('firstName', value)}
+              autoCapitalize="words"
+              placeholder="First name"
+              placeholderTextColor="#94a3b8"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Last name</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formState.lastName}
+              onChangeText={(value) => handleInputChange('lastName', value)}
+              autoCapitalize="words"
+              placeholder="Last name"
+              placeholderTextColor="#94a3b8"
+            />
+          </View>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Email</Text>
+          <TextInput
+            style={styles.textInput}
+            value={formState.email}
+            onChangeText={(value) => handleInputChange('email', value)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholder="Email address"
+            placeholderTextColor="#94a3b8"
           />
-          <Text style={styles.drawerTitle}>Edit profile</Text>
-          <Text style={styles.drawerSubtitle}>
-            Update your contact information and saved addresses. Changes apply instantly.
-          </Text>
+        </View>
 
-          <ScrollView
-            style={styles.drawerScroll}
-            contentContainerStyle={styles.drawerContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.formRow}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>First name</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={formState.firstName}
-                  onChangeText={(value) => handleInputChange('firstName', value)}
-                  autoCapitalize='words'
-                  placeholder='First name'
-                  placeholderTextColor='#94a3b8'
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Last name</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={formState.lastName}
-                  onChangeText={(value) => handleInputChange('lastName', value)}
-                  autoCapitalize='words'
-                  placeholder='Last name'
-                  placeholderTextColor='#94a3b8'
-                />
+        <View style={styles.formRow}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Primary phone</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formState.phone}
+              onChangeText={(value) => handleInputChange('phone', value)}
+              keyboardType="phone-pad"
+              placeholder="+91 90000 00000"
+              placeholderTextColor="#94a3b8"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Alternative phone</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formState.altPhone}
+              onChangeText={(value) => handleInputChange('altPhone', value)}
+              keyboardType="phone-pad"
+              placeholder="Optional"
+              placeholderTextColor="#94a3b8"
+            />
+          </View>
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Addresses</Text>
+          <Text style={styles.sectionHint}>Store multiple delivery locations for faster checkout.</Text>
+        </View>
+
+        {formState.addresses.map((address) => (
+          <View key={address.id} style={styles.addressCard}>
+            <View style={styles.addressHeader}>
+              <TextInput
+                style={[styles.textInput, styles.addressTitleInput]}
+                value={address.label}
+                onChangeText={(value) => handleAddressChange(address.id, 'label', value)}
+                placeholder="Label (Home, Work)"
+                placeholderTextColor="#94a3b8"
+              />
+
+              <View style={styles.addressHeaderActions}>
+                <TouchableOpacity
+                  style={[
+                    styles.defaultAddressButton,
+                    address.isDefault && styles.defaultAddressButtonActive,
+                  ]}
+                  onPress={() => handleSetDefaultAddress(address.id)}
+                >
+                  <Ionicons
+                    name={address.isDefault ? 'radio-button-on' : 'radio-button-off'}
+                    size={18}
+                    color={address.isDefault ? '#38bdf8' : 'rgba(255,255,255,0.6)'}
+                  />
+                  <Text
+                    style={[
+                      styles.defaultAddressButtonText,
+                      address.isDefault && styles.defaultAddressButtonTextActive,
+                    ]}
+                  >
+                    {address.isDefault ? 'Default' : 'Make default'}
+                  </Text>
+                </TouchableOpacity>
+
+                {formState.addresses.length > 1 ? (
+                  <TouchableOpacity
+                    style={styles.removeAddressButton}
+                    onPress={() => handleRemoveAddress(address.id)}
+                  >
+                    <Ionicons name="trash-outline" size={16} color="#fca5a5" />
+                  </TouchableOpacity>
+                ) : null}
               </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
+            <TextInput
+              style={styles.textInput}
+              value={address.line1}
+              onChangeText={(value) => handleAddressChange(address.id, 'line1', value)}
+              placeholder="Address line 1"
+              placeholderTextColor="rgba(255,255,255,0.4)"
+            />
+            <TextInput
+              style={styles.textInput}
+              value={address.line2 ?? ''}
+              onChangeText={(value) => handleAddressChange(address.id, 'line2', value)}
+              placeholder="Address line 2 (optional)"
+              placeholderTextColor="rgba(255,255,255,0.4)"
+            />
+
+            <View style={styles.addressInlineRow}>
               <TextInput
-                style={styles.textInput}
-                value={formState.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                keyboardType='email-address'
-                autoCapitalize='none'
-                placeholder='Email address'
-                placeholderTextColor='#94a3b8'
+                style={[styles.textInput, styles.addressInlineInput]}
+                value={address.city}
+                onChangeText={(value) => handleAddressChange(address.id, 'city', value)}
+                placeholder="City"
+                placeholderTextColor="rgba(255,255,255,0.4)"
+              />
+              <TextInput
+                style={[styles.textInput, styles.addressInlineInput]}
+                value={address.state}
+                onChangeText={(value) => handleAddressChange(address.id, 'state', value)}
+                placeholder="State"
+                placeholderTextColor="rgba(255,255,255,0.4)"
               />
             </View>
 
-            <View style={styles.formRow}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Primary phone</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={formState.phone}
-                  onChangeText={(value) => handleInputChange('phone', value)}
-                  keyboardType='phone-pad'
-                  placeholder='+91 90000 00000'
-                  placeholderTextColor='#94a3b8'
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Alternative phone</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={formState.altPhone}
-                  onChangeText={(value) => handleInputChange('altPhone', value)}
-                  keyboardType='phone-pad'
-                  placeholder='Optional'
-                  placeholderTextColor='#94a3b8'
-                />
-              </View>
-            </View>
+            <TextInput
+              style={styles.textInput}
+              value={address.postalCode}
+              onChangeText={(value) => handleAddressChange(address.id, 'postalCode', value)}
+              placeholder="Postal code"
+              placeholderTextColor="#94a3b8"
+              keyboardType="number-pad"
+            />
+          </View>
+        ))}
 
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Addresses</Text>
-              <Text style={styles.sectionHint}>Store multiple delivery locations for faster checkout.</Text>
-            </View>
+        <TouchableOpacity style={styles.addAddressButton} onPress={handleAddAddress}>
+          <Ionicons name="add-circle-outline" size={18} color="#ffffff" />
+          <Text style={styles.addAddressText}>Add another address</Text>
+        </TouchableOpacity>
 
-            {formState.addresses.map((address) => (
-              <View key={address.id} style={styles.addressCard}>
-                <View style={styles.addressHeader}>
-                  <TextInput
-                    style={[styles.textInput, styles.addressTitleInput]}
-                    value={address.label}
-                    onChangeText={(value) => handleAddressChange(address.id, 'label', value)}
-                    placeholder='Label (Home, Work)'
-                    placeholderTextColor='#94a3b8'
-                  />
-                  <View style={styles.addressHeaderActions}>
-                    <TouchableOpacity
-                      style={[
-                        styles.defaultAddressButton,
-                        address.isDefault && styles.defaultAddressButtonActive,
-                      ]}
-                      onPress={() => handleSetDefaultAddress(address.id)}
-                      accessibilityRole='button'
-                      accessibilityState={{ selected: address.isDefault }}
-                      accessibilityLabel={
-                        address.isDefault
-                          ? 'Default delivery address'
-                          : 'Set as default delivery address'
-                      }
-                    >
-                      <Ionicons
-                        name={address.isDefault ? 'radio-button-on' : 'radio-button-off'}
-                        size={18}
-                        color={address.isDefault ? '#0C2B4E' : '#64748b'}
-                      />
-                      <Text
-                        style={[
-                          styles.defaultAddressButtonText,
-                          address.isDefault && styles.defaultAddressButtonTextActive,
-                        ]}
-                      >
-                        {address.isDefault ? 'Default' : 'Make default'}
-                      </Text>
-                    </TouchableOpacity>
-                    {formState.addresses.length > 1 ? (
-                      <TouchableOpacity
-                        style={styles.removeAddressButton}
-                        onPress={() => handleRemoveAddress(address.id)}
-                        accessibilityRole='button'
-                        accessibilityLabel='Remove address'
-                      >
-                        <Ionicons name='trash-outline' size={16} color='#ef4444' />
-                      </TouchableOpacity>
-                    ) : null}
-                  </View>
-                </View>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-                <TextInput
-                  style={styles.textInput}
-                  value={address.line1}
-                  onChangeText={(value) => handleAddressChange(address.id, 'line1', value)}
-                  placeholder='Address line 1'
-                  placeholderTextColor='#94a3b8'
-                />
-                <TextInput
-                  style={styles.textInput}
-                  value={address.line2 ?? ''}
-                  onChangeText={(value) => handleAddressChange(address.id, 'line2', value)}
-                  placeholder='Address line 2 (optional)'
-                  placeholderTextColor='#94a3b8'
-                />
-                <View style={styles.addressInlineRow}>
-                  <TextInput
-                    style={[styles.textInput, styles.addressInlineInput]}
-                    value={address.city}
-                    onChangeText={(value) => handleAddressChange(address.id, 'city', value)}
-                    placeholder='City'
-                    placeholderTextColor='#94a3b8'
-                  />
-                  <TextInput
-                    style={[styles.textInput, styles.addressInlineInput]}
-                    value={address.state}
-                    onChangeText={(value) => handleAddressChange(address.id, 'state', value)}
-                    placeholder='State'
-                    placeholderTextColor='#94a3b8'
-                  />
-                </View>
-                <TextInput
-                  style={styles.textInput}
-                  value={address.postalCode}
-                  onChangeText={(value) => handleAddressChange(address.id, 'postalCode', value)}
-                  placeholder='Postal code'
-                  placeholderTextColor='#94a3b8'
-                  keyboardType='number-pad'
-                />
-              </View>
-            ))}
-
-            <TouchableOpacity
-              style={styles.addAddressButton}
-              onPress={handleAddAddress}
-              accessibilityRole='button'
-              accessibilityLabel='Add another address'
-            >
-              <Ionicons name='add-circle-outline' size={18} color='#0C2B4E' />
-              <Text style={styles.addAddressText}>Add another address</Text>
-            </TouchableOpacity>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={handleClose}
-                accessibilityRole='button'
-                accessibilityLabel='Cancel profile update'
-              >
-                <Text style={styles.secondaryButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleSubmit}
-                accessibilityRole='button'
-                accessibilityLabel='Save profile changes'
-              >
-                <Text style={styles.primaryButtonText}>Save changes</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+        <View style={styles.actionRow}>
+          <TouchableOpacity style={styles.secondaryButton} onPress={handleClose}>
+            <Text style={styles.secondaryButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
+            <Text style={styles.primaryButtonText}>Save changes</Text>
+          </TouchableOpacity>
         </View>
-      </Animated.View>
-    </Modal>
+      </ScrollView>
+    </DraggableDrawer>
   );
 }
 
@@ -1057,7 +943,7 @@ function EmptyCartProfile() {
   return (
     <View style={styles.emptyWrapper}>
       <View style={styles.emptyState}>
-        <Ionicons name='cart-outline' size={44} color='#0C2B4E' />
+        <Ionicons name='cart-outline' size={44} color='rgba(255,255,255,0.4)' />
         <Text style={styles.emptyTitle}>Your cart is empty</Text>
         <Text style={styles.emptySubtitle}>
           Check out the Shop tab to find products.
@@ -1084,22 +970,22 @@ function ProfileCartItem({ entry, index, onIncrement, onDecrement, onRemove }: P
   const lineTotal = typeof price === 'number' ? (price * quantity).toFixed(2) : null;
 
   return (
-    <View style={styles.favoriteCard}>
+    <BlurView intensity={20} tint="dark" style={styles.favoriteCard}>
       {imageUri ? (
-        <Image source={{ uri: imageUri }} style={{ width: 60, height: 60, borderRadius: 12, backgroundColor: '#e2e8f0' }} />
+        <Image source={{ uri: imageUri }} style={{ width: 60, height: 60, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)' }} />
       ) : (
-        <View style={{ width: 60, height: 60, borderRadius: 12, backgroundColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name="image-outline" size={20} color="#64748b" />
+        <View style={{ width: 60, height: 60, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}>
+          <Ionicons name="image-outline" size={20} color="rgba(255,255,255,0.5)" />
         </View>
       )}
       <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ fontSize: 15, fontWeight: '600', color: '#0f172a' }} numberOfLines={1}>{title}</Text>
+        <Text style={{ fontSize: 15, fontWeight: '600', color: '#ffffff' }} numberOfLines={1}>{title}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={{ fontSize: 13, fontWeight: '500', color: '#475569' }}>
+          <Text style={{ fontSize: 13, fontWeight: '500', color: 'rgba(255,255,255,0.6)' }}>
             Qty {quantity}
           </Text>
           {lineTotal && (
-            <Text style={{ fontSize: 13, fontWeight: '700', color: '#0C2B4E' }}>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: '#ffffff' }}>
               ₹{lineTotal}
             </Text>
           )}
@@ -1109,24 +995,24 @@ function ProfileCartItem({ entry, index, onIncrement, onDecrement, onRemove }: P
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <TouchableOpacity
           onPress={() => onDecrement(key)}
-          style={{ padding: 6, backgroundColor: '#f1f5f9', borderRadius: 8 }}
+          style={{ padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
         >
-          <Ionicons name="remove" size={16} color="#0f172a" />
+          <Ionicons name="remove" size={16} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onIncrement(key, product)}
-          style={{ padding: 6, backgroundColor: '#f1f5f9', borderRadius: 8 }}
+          style={{ padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
         >
-          <Ionicons name="add" size={16} color="#0f172a" />
+          <Ionicons name="add" size={16} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onRemove(key)}
-          style={{ padding: 6, backgroundColor: '#fee2e2', borderRadius: 8 }}
+          style={{ padding: 6, backgroundColor: 'rgba(239, 68, 68, 0.2)', borderRadius: 8 }}
         >
-          <Ionicons name="trash-outline" size={16} color="#dc2626" />
+          <Ionicons name="trash-outline" size={16} color="#fca5a5" />
         </TouchableOpacity>
       </View>
-    </View>
+    </BlurView>
   );
 }
 
@@ -1139,7 +1025,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingTop: 100, // Header space
+    paddingTop: 140, // Header space
     paddingHorizontal: 20, // Standardized
     paddingBottom: 120,
     gap: 16,
@@ -1149,12 +1035,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   heroCard: {
-    backgroundColor: '#0C2B4E',
     borderRadius: 24,
     padding: 24,
     gap: 12,
-    shadowColor: '#0C2B4E',
-    shadowOpacity: 0.2,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 10 },
     elevation: 5,
@@ -1178,15 +1063,13 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Removed for Glass
     borderRadius: 16,
     padding: 6,
     gap: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   tabButton: {
     flex: 1,
@@ -1196,18 +1079,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tabButtonActive: {
-    backgroundColor: '#e0f2fe',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   orderCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Removed for Glass
     borderRadius: 18,
     padding: 18,
     gap: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   orderHeader: {
     flexDirection: 'row',
@@ -1217,31 +1098,30 @@ const styles = StyleSheet.create({
   orderId: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   orderMeta: {
     fontSize: 13,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
   },
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: '#e2e8f0',
   },
   statusDelivered: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: 'rgba(220, 252, 231, 0.2)', // Light green glass
   },
   statusProcessing: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: 'rgba(254, 243, 199, 0.2)', // Light yellow glass
   },
   statusCancelled: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: 'rgba(254, 226, 226, 0.2)', // Light red glass
   },
   statusText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
     textTransform: 'uppercase',
   },
   orderItems: {
@@ -1259,48 +1139,46 @@ const styles = StyleSheet.create({
   orderItemTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   orderItemMeta: {
     fontSize: 13,
-    color: '#64748b',
+    color: 'rgba(255,255,255,0.6)',
   },
   orderFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: 'rgba(255,255,255,0.1)',
     paddingTop: 10,
   },
   orderTotalLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#475569',
+    color: 'rgba(255,255,255,0.7)',
   },
   orderTotalValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   favoriteCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Removed for Glass
     padding: 16,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   favoriteIconWrap: {
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1311,27 +1189,25 @@ const styles = StyleSheet.create({
   favoriteTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   favoriteMeta: {
     fontSize: 13,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
   },
   aboutCard: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff', // Removed for Glass
     borderRadius: 18,
     padding: 20,
     gap: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   aboutTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   aboutRow: {
     flexDirection: 'row',
@@ -1345,7 +1221,7 @@ const styles = StyleSheet.create({
   },
   aboutValue: {
     fontSize: 15,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.8)',
   },
   addressBlock: {
     flex: 1,
@@ -1358,7 +1234,7 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   aboutAddressHeader: {
     flexDirection: 'row',
@@ -1368,7 +1244,7 @@ const styles = StyleSheet.create({
   aboutAddressLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#ffffff',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -1376,12 +1252,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   defaultBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#0C2B4E',
+    color: '#ffffff',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -1396,12 +1272,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   editButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0C2B4E',
+    color: '#ffffff',
   },
   emptyWrapper: {
     marginTop: 12,
@@ -1416,11 +1292,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   emptySubtitle: {
     fontSize: 14,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -1433,7 +1309,7 @@ const styles = StyleSheet.create({
   drawerBackdrop: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   backdropPressable: {
     flex: 1,
@@ -1442,7 +1318,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   drawerShell: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f172a',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
@@ -1454,25 +1330,26 @@ const styles = StyleSheet.create({
     width: 46,
     height: 5,
     borderRadius: 999,
-    backgroundColor: '#cbd5f5',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     marginBottom: 12,
   },
   drawerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   drawerSubtitle: {
     fontSize: 14,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
     marginTop: 4,
     marginBottom: 16,
   },
   drawerScroll: {
-    flexGrow: 0,
+    flex: 1, // Fix scrolling
   },
   drawerContent: {
     gap: 18,
+    paddingTop: 140, // Add padding for absolute header
     paddingBottom: DRAWER_BOTTOM_PADDING,
   },
   formRow: {
@@ -1486,17 +1363,17 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#334155',
+    color: 'rgba(255,255,255,0.8)',
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#cbd5f5',
+    borderColor: 'rgba(255,255,255,0.2)',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    color: '#0f172a',
-    backgroundColor: '#ffffff',
+    color: '#ffffff',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   sectionHeader: {
     gap: 6,
@@ -1504,19 +1381,19 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   sectionHint: {
     fontSize: 13,
-    color: '#64748b',
+    color: 'rgba(255,255,255,0.6)',
   },
   addressCard: {
     gap: 10,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#f8fafc',
+    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   addressHeader: {
     flexDirection: 'row',
@@ -1540,20 +1417,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#cbd5f5',
-    backgroundColor: '#ffffff',
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'transparent',
   },
   defaultAddressButtonActive: {
-    borderColor: '#0C2B4E',
-    backgroundColor: '#e0f2fe',
+    borderColor: '#38bdf8',
+    backgroundColor: 'rgba(56, 189, 248, 0.2)',
   },
   defaultAddressButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
   },
   defaultAddressButtonTextActive: {
-    color: '#0C2B4E',
+    color: '#38bdf8',
   },
   removeAddressButton: {
     width: 36,
@@ -1561,7 +1438,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fee2e2',
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
   },
   addressInlineRow: {
     flexDirection: 'row',
@@ -1579,13 +1456,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#bae6fd',
-    backgroundColor: '#ecfeff',
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   addAddressText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0C2B4E',
+    color: '#ffffff',
   },
   errorText: {
     fontSize: 13,
@@ -1601,7 +1478,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderRadius: 999,
-    backgroundColor: '#0C2B4E',
+    backgroundColor: '#38bdf8',
   },
   primaryButtonText: {
     fontSize: 14,
@@ -1612,11 +1489,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderRadius: 999,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   secondaryButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#ffffff',
   },
 });

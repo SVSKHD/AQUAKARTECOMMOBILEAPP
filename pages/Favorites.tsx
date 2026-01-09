@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
 import { triggerHaptic, triggerNotificationHaptic, triggerSelectionHaptic } from '../utils/haptics';
 import { useFavoritesStore } from '../store/favoritesStore';
 import { Product, getProductImages, getProductTitle, getProductPrice } from '../utils/products';
@@ -33,7 +34,7 @@ export default function FavoritesPage() {
   if (entries.length === 0) {
     return (
       <View style={styles.emptyState}>
-        <Ionicons name="heart-outline" size={44} color="#0C2B4E" />
+        <Ionicons name="heart-outline" size={44} color="rgba(255,255,255,0.4)" />
         <Text style={styles.emptyTitle}>No favourites yet</Text>
         <Text style={styles.emptySubtitle}>
           Tap the heart icon on any product to save it here for quick access.
@@ -53,7 +54,7 @@ export default function FavoritesPage() {
         ListHeaderComponent={
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>Your Favourites</Text>
+              {/* Title moved to global header */}
               <Text style={styles.subtitle}>
                 {entries.length} saved item{entries.length > 1 ? 's' : ''}
               </Text>
@@ -68,7 +69,7 @@ export default function FavoritesPage() {
               accessibilityLabel="Clear favourites"
               activeOpacity={0.85}
             >
-              <Ionicons name="trash-outline" size={18} color="#0C2B4E" />
+              <Ionicons name="trash-outline" size={18} color="#fca5a5" />
               <Text style={styles.clearButtonText}>Clear</Text>
             </TouchableOpacity>
           </View>
@@ -109,12 +110,12 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
   const price = getProductPrice(product);
 
   return (
-    <View style={styles.card}>
+    <BlurView intensity={20} tint="dark" style={styles.card}>
       {imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.thumbnail} />
       ) : (
         <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
-          <Ionicons name="image-outline" size={20} color="#64748b" />
+          <Ionicons name="image-outline" size={20} color="rgba(255,255,255,0.5)" />
         </View>
       )}
       <View style={styles.cardContent}>
@@ -128,7 +129,7 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
             )}
             {inCart && (
               <View style={styles.inCartBadge}>
-                <Ionicons name="checkmark-circle" size={16} color="#0C2B4E" />
+                <Ionicons name="checkmark-circle" size={16} color="#ffffff" />
                 <Text style={styles.inCartText}>In Cart</Text>
               </View>
             )}
@@ -155,7 +156,7 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
             <Ionicons
               name={inCart ? 'checkmark' : 'cart-outline'}
               size={20}
-              color={inCart ? '#0C2B4E' : '#ffffff'}
+              color={inCart ? '#ffffff' : '#ffffff'}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -168,11 +169,11 @@ function FavoriteCard({ entry, index, onRemove, onAddToCart, inCart }: FavoriteC
             accessibilityLabel="Remove item from favourites"
             activeOpacity={0.85}
           >
-            <Ionicons name="trash-outline" size={20} color="#dc2626" />
+            <Ionicons name="trash-outline" size={20} color="#fca5a5" />
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </BlurView>
   );
 }
 
@@ -187,17 +188,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24, // Standardized bottom margin
+    marginBottom: 12, // Reduced from 24
   },
-  title: {
-    fontSize: 28, // Standardized from 26
-    fontWeight: '700',
-    color: '#0f172a',
-  },
+
   subtitle: {
     marginTop: 4,
     fontSize: 14,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
   },
   clearButton: {
     flexDirection: 'row',
@@ -205,34 +202,32 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: '#fee2e2',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
   },
   clearButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#dc2626',
+    color: '#fca5a5',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   listContent: {
     paddingHorizontal: 0,
     gap: 12,
-    paddingTop: 100, // Header space
+    paddingTop: 140, // Increased spacing for header
     paddingBottom: 40,
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff', // Cart uses #fdfefe but #fff is fine standard
+    // backgroundColor removed, using BlurView
     borderRadius: 16, // Standardized from 18
     padding: 14,
-    borderWidth: StyleSheet.hairlineWidth, // Added border
-    borderColor: '#e2e8f0', // Added border color
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    overflow: 'hidden',
+    borderWidth: 1, // Added border
+    borderColor: 'rgba(255,255,255,0.1)', // Added border color
     gap: 16,
     alignItems: 'center',
   },
@@ -240,7 +235,7 @@ const styles = StyleSheet.create({
     width: 72, // Match Cart 72
     height: 72, // Match Cart 72
     borderRadius: 12, // Standardized from 14
-    backgroundColor: '#e2e8f0',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   thumbnailPlaceholder: {
     alignItems: 'center',
@@ -253,7 +248,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 17, // Match Cart 17 (was 16)
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   metaRow: {
     flexDirection: 'row',
@@ -263,21 +258,23 @@ const styles = StyleSheet.create({
   cardPrice: {
     fontSize: 15, // Match Cart Quantity Text approx or Keep as is? Cart uses 14/15. 15 is good.
     fontWeight: '600',
-    color: '#0C2B4E',
+    color: 'rgba(255,255,255,0.9)',
   },
   inCartBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   inCartText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#0C2B4E',
+    color: '#ffffff',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
@@ -289,18 +286,12 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#0C2B4E',
+    backgroundColor: '#38bdf8', // Light blue accent
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#0C2B4E',
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
   },
   iconButtonPrimaryAdded: {
-    backgroundColor: '#e0f2fe',
-    shadowOpacity: 0.1,
+    backgroundColor: 'rgba(56, 189, 248, 0.3)', // Dimmed when added
   },
   iconButtonSecondary: {
     width: 42,
@@ -309,8 +300,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#fecaca',
-    backgroundColor: '#fff1f2',
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
   emptyState: {
     flex: 1,
@@ -322,11 +313,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   emptySubtitle: {
     fontSize: 15,
-    color: '#475569',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     lineHeight: 21,
   },

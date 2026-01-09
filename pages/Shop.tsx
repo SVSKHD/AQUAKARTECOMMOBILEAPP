@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listContent: {
-    paddingTop: 100, // Header space
+    paddingTop: 140, // Increased spacing for header
     paddingBottom: LIST_BOTTOM_GUTTER,
     paddingHorizontal: CONTENT_PADDING,
     gap: 16,

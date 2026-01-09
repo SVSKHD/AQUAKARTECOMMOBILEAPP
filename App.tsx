@@ -8,24 +8,12 @@ import {
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import { TabKey } from './components/types/layout';
-import { Video, ResizeMode } from 'expo-av';
+import { LinearGradient } from 'expo-linear-gradient';
 import MainLayout from './components/layouts/mainlayout';
 
 
-type TabConfig = {
-  key: TabKey;
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  activeIcon: keyof typeof Ionicons.glyphMap;
-};
 
-const TABS: TabConfig[] = [
-  { key: 'home', label: 'Home', icon: 'home-outline', activeIcon: 'home' },
-  { key: 'shop', label: 'Shop', icon: 'pricetags-outline', activeIcon: 'pricetags' },
-  { key: 'favorites', label: 'Favorites', icon: 'heart-outline', activeIcon: 'heart' },
-  { key: 'cart', label: 'Cart', icon: 'cart-outline', activeIcon: 'cart' },
-  { key: 'profile', label: 'Profile', icon: 'person-outline', activeIcon: 'person' },
-];
+
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,28 +21,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <View style={styles.root}>
-        {/* Global Background Video */}
-        <Video
-          source={{
-            uri: 'https://assets.mixkit.co/videos/preview/mixkit-swimming-pool-water-texture-slow-motion-18261-large.mp4',
-          }}
+        <LinearGradient
+          colors={['#24243e', '#302b63', '#0f0c29']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay
-          isLooping
-          isMuted
-        />
-
-        {/* Global Overlay for readability */}
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundColor: isAuthenticated
-                ? 'rgba(248, 250, 252, 0.75)'
-                : 'rgba(255, 255, 255, 0.2)',
-            },
-          ]}
         />
 
         {isAuthenticated ? (
@@ -74,14 +45,13 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#000',
   },
   safeArea: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
+    // paddingTop removed to allow scroll behind header
   },
 
   headerContainer: {
@@ -94,31 +64,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
-  header: {
-    width: '100%',
-    maxWidth: 420,
-    marginTop: Platform.OS === 'ios' ? 60 : 10, // Push down a bit
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingLeft: 0,
-    paddingRight: 0,
-    paddingVertical: 12,
-    borderRadius: 999,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 10,
-      },
-      android: { elevation: 10 },
-    }),
-  },
+  // Legacy header style removed as it is handled in header.tsx
   logo: {
     width: 100,
     height: 32,
